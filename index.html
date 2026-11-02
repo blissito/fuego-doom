@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fuego de DOOM en JavaScript · 37 colores</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:system-ui,sans-serif}
+canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
+canvas{position:fixed;inset:0}
+#o{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:22px;font-family:'Press Start 2P',monospace;color:#fff;pointer-events:none}
+#o *{pointer-events:auto}
+.k{font-size:clamp(11px,2.8vw,18px);color:#ffcf6f;letter-spacing:2px}
+h1{margin:0;font-size:clamp(30px,9vw,96px);line-height:1.35;color:#fff;text-shadow:4px 4px 0 #8f2707,8px 8px 0 #000}
+.s{font-size:clamp(13px,3.4vw,24px);line-height:1.8;max-width:1000px;text-shadow:2px 2px 0 #000}
+.d{font-size:clamp(13px,3.2vw,22px);color:#ffdf9f;line-height:2;text-shadow:2px 2px 0 #000}
+a.b{display:inline-block;font-family:inherit;font-size:clamp(14px,3.4vw,24px);color:#000;background:#ffe36b;padding:16px 22px;text-decoration:none;box-shadow:6px 6px 0 #000;border:3px solid #000}
+a.b:active{transform:translate(4px,4px);box-shadow:2px 2px 0 #000}
+#t{position:fixed;left:0;right:0;bottom:12px;text-align:center;color:#fff6;font:11px 'Press Start 2P',monospace;pointer-events:none}
+a.g{font-size:clamp(9px,2vw,12px);color:#ffcf6fcc;line-height:1.8;text-decoration:none;max-width:700px;text-shadow:2px 2px 0 #000}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="o">
+<div class="k">★ EL EFECTO CLÁSICO DE DOOM (PSX) ★</div>
+<h1>FUEGO<br>DE DOOM</h1>
+<div class="s">37 colores, un arreglo de números y unas cuantas líneas de JavaScript. Sin shaders ni física: cada pixel toma el calor del de abajo, se enfría un poco y se corre al azar.</div>
+<a class="b" href="https://github.com/blissito/fuego-doom" target="_blank" rel="noopener">VER EL CÓDIGO ▶</a>
+<a class="g" href="https://www.ghosty.studio/c" target="_blank" rel="noopener">Hecho con Ghosty · micro-hackatón «Veamos si sabes vibe-codear», jueves 12 nov ↗</a>
+</div>
+<div id="t">Toca el fuego para apagarlo o prenderlo</div>
+<script>
+// Paleta original de 37 colores del fuego de DOOM (PSX)
+const P=[0x07,0x07,0x07,0x1F,0x07,0x07,0x2F,0x0F,0x07,0x47,0x0F,0x07,0x57,0x17,0x07,0x67,0x1F,0x07,0x77,0x1F,0x07,0x8F,0x27,0x07,0x9F,0x2F,0x07,0xAF,0x3F,0x07,0xBF,0x47,0x07,0xC7,0x47,0x07,0xDF,0x4F,0x07,0xDF,0x57,0x07,0xDF,0x57,0x07,0xD7,0x5F,0x07,0xD7,0x5F,0x07,0xD7,0x67,0x0F,0xCF,0x6F,0x0F,0xCF,0x77,0x0F,0xCF,0x7F,0x0F,0xCF,0x87,0x17,0xC7,0x87,0x17,0xC7,0x8F,0x17,0xC7,0x97,0x1F,0xBF,0x9F,0x1F,0xBF,0x9F,0x1F,0xBF,0xA7,0x27,0xBF,0xA7,0x27,0xBF,0xAF,0x2F,0xB7,0xAF,0x2F,0xB7,0xB7,0x2F,0xB7,0xB7,0x37,0xCF,0xCF,0x6F,0xDF,0xDF,0x9F,0xEF,0xEF,0xC7,0xFF,0xFF,0xFF];
+const MAX=36, c=document.getElementById('c'), x=c.getContext('2d');
+let W,H,f,img,on=true;
+function init(){
+  W=Math.min(320,Math.ceil(innerWidth/3)); H=Math.ceil(W*innerHeight/innerWidth);
+  c.width=W;c.height=H;f=new Uint8Array(W*H);img=x.createImageData(W,H);
+  for(let i=0;i<W;i++)f[(H-1)*W+i]=MAX;
+}
+function spread(src){
+  const p=f[src];
+  if(p===0){f[src-W]=0;return}
+  const r=Math.round(Math.random()*3)&3;   // viento hacia la izquierda
+  f[src-r+1-W]=p-(r&1);                     // enfría al subir
+}
+function step(){
+  for(let xx=0;xx<W;xx++)for(let y=1;y<H;y++)spread(y*W+xx);
+  const d=img.data;
+  for(let i=0;i<f.length;i++){const k=f[i]*3,j=i*4;d[j]=P[k];d[j+1]=P[k+1];d[j+2]=P[k+2];d[j+3]=255}
+  x.putImageData(img,0,0);
+  requestAnimationFrame(step);
+}
+c.onclick=()=>{on=!on;for(let i=0;i<W;i++)f[(H-1)*W+i]=on?MAX:0};
+addEventListener('resize',init);init();step();
+</script></body></html>
